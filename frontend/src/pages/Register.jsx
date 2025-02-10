@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import {
     Box, FormControl, FormLabel, Heading, Text, Input, Button, VStack, Flex, InputGroup, InputRightElement, Container, Image, useToast
 } from '@chakra-ui/react';
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+//import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import axios from 'axios';
 import smiski_logo from '../components/smiski_logo.png';
 import { useNavigate } from 'react-router-dom';
@@ -198,7 +199,7 @@ const Register = () => {
                                         _hover={{ bg: 'transparent' }}
                                         _active={{ bg: 'gray.400' }}
                                     >
-                                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                        {showPassword ? <IoMdEyeOff /> : <IoMdEye />}
                                     </Button>
                                 </InputRightElement>
                             </InputGroup>
@@ -232,7 +233,7 @@ const Register = () => {
                                         _hover={{ bg: 'transparent' }}
                                         _active={{ bg: 'gray.400' }}
                                     >
-                                        {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                                        {showConfirmPassword ? <IoMdEyeOff /> : <IoMdEye />}
                                     </Button>
                                 </InputRightElement>
                             </InputGroup>

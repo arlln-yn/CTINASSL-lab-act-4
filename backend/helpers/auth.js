@@ -1,15 +1,21 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
 
-// Function to hash the password
+dotenv.config(); // Load environment variables
+
+const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) 
+
 export const hashPassword = (password) => {
     return new Promise((resolve, reject) => {
-        bcrypt.genSalt(12, (err, salt) => {
+        bcrypt.genSalt(saltRounds, (err, salt) => {
             if (err) {
-                reject(err);
+                console.error("Error generating salt:", err);
+                return reject(new Error("Password hashing failed."));
             }
             bcrypt.hash(password, salt, (err, hash) => {
                 if (err) {
-                    reject(err);
+                    console.error("Error hashing password:", err);
+                    return reject(new Error("Password hashing failed."));
                 }
                 resolve(hash);
             });
@@ -17,7 +23,6 @@ export const hashPassword = (password) => {
     });
 };
 
-// Function to compare the password
 export const comparePassword = (password, hashed) => {
     return bcrypt.compare(password, hashed);
 };

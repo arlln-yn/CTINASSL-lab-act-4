@@ -14,22 +14,23 @@ import {
     Flex,
     Container,
     Image,
-    useToast
+    useToast,
+    // getToken
 } from '@chakra-ui/react';
 
 import { Link, useNavigate } from 'react-router-dom';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import smiski_logo from '../components/smiski_logo.png';
 import axios from 'axios';
 
 const Login = () => {
     const navigate = useNavigate();
-    const toast = useToast(); // Initialize Chakra UI toast
+    const toast = useToast(); 
     const [data, setData] = useState({
         email: '',
         password: '',
     });
-    const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleClick = () => setShowPassword(!showPassword);
 
@@ -37,8 +38,7 @@ const Login = () => {
     const loginUser = async (e) => {
         e.preventDefault();
         const { email, password } = data;
-
-        // Simple validation
+    
         if (!email || !password) {
             toast({
                 title: 'Error',
@@ -49,9 +49,14 @@ const Login = () => {
             });
             return;
         }
-
+    
         try {
-            const response = await axios.post('http://localhost:5000/login', { email, password });
+            const response = await axios.post(
+                "http://localhost:5000/login",
+                { email, password },
+                { withCredentials: true } // allow cookies to be sent with the request
+            );
+                
             if (response.data.error) {
                 toast({
                     title: 'Error',
@@ -61,6 +66,9 @@ const Login = () => {
                     isClosable: true,
                 });
             } else {
+                // store token in lOCAAL STORAGE ===============
+                localStorage.setItem('token', response.data.token);
+    
                 setData({ email: '', password: '' });
                 toast({
                     title: 'Success',
@@ -78,10 +86,18 @@ const Login = () => {
                 description: 'An error occurred. Please try again.',
                 status: 'error',
                 duration: 4000,
-                isClosable: true,
+                isClosable: true,   
             });
         }
+    };    
+
+    //logout
+    const logoutUser = () => {
+        localStorage.removeItem('token'); // Remove token
+        window.location.href = "/";
     };
+    
+
 
     return (
         <Flex
@@ -170,7 +186,7 @@ const Login = () => {
                                         _hover={{ bg: 'transparent' }}
                                         _active={{ bg: 'gray.400' }}
                                     >
-                                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                        {showPassword ? <IoMdEyeOff /> : <IoMdEye />}
                                     </Button>
                                 </InputRightElement>
                             </InputGroup>

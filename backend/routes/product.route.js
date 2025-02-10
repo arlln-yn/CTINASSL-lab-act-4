@@ -3,8 +3,14 @@ import { getProducts, createProduct, updateProduct, deleteProduct, getSalesData,
     getSeries1,
     getSeries2,
     getSeries3 } from "../controllers/product.controller.js";
-//new added  getSalesData for dashboard
+import requireAuth from '../middleware/requireAuth.js';  
+
+
+
 const router = express.Router();
+
+router.use(requireAuth); 
+
 
 router.get("/", getProducts);
 
@@ -20,7 +26,7 @@ router.put("/:id", updateProduct);
 
 router.delete("/:id", deleteProduct);
 
-router.get('/sales', getSalesData);
+
 
 
 export default router;

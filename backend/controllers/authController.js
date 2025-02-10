@@ -3,8 +3,6 @@ import { hashPassword, comparePassword } from '../helpers/auth.js';
 import jwt from 'jsonwebtoken';
 
 
-//register endpoint
-
 export const registerUser = async (req, res) => {
     try {
         const {name, email, password} = req.body;
@@ -19,9 +17,7 @@ export const registerUser = async (req, res) => {
                 error: 'Password is required and should be at least 6 chars long'
             })
         };
-        // Check email
         const exist = await User.findOne({email})
-        // do the same for username
         if(exist) {
             return res.json({
                 error: 'Email is already taken'
@@ -30,7 +26,6 @@ export const registerUser = async (req, res) => {
 
         const hashedPassword = await hashPassword(password)
 
-        //create user in database
         const user = await User.create({
             name, 
             email, 
@@ -45,38 +40,56 @@ export const registerUser = async (req, res) => {
 
 }
 
-//login endpoint
 export const loginUser = async (req, res) => {
     try {
-        const {email, password} = req.body;
+        const { email, password } = req.body;
 
-        // check if user exists
-        const user = await User.findOne({email});
-        if(!user) {
-            return res.json({
-                error: 'No user found'
-            })
+        const user = await User.findOne({ email }).select("+password");
+        if (!user) {
+            return res.status(404).json({ error: 'No user found' });
         }
 
-        // check if passwords match
-        const match = await comparePassword(password, user.password)
-        if(match) {
-            jwt.sign({email: user.email, id: user._id, name: user.name}, process.env.JWT_SECRET, {}, (err, token) => {
-                if(err) throw err;
-                res.cookie('token', token).json(user)
-            })
+        const match = await comparePassword(password, user.password);
+        if (!match) {
+            return res.status(400).json({ error: "Incorrect password." });
         }
-        if(!match) {
-            res.json({
-                error: "Passwords do not match"
-            })
-        }
+
+        // geerate JWT token
+        const token = jwt.sign(
+            { email: user.email, _id: user._id, name: user.name },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        // Remove password before sending user data
+        const sanitizedUser = {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+        };
+
+        // Set secure HTTP-only cookie
+        res.cookie('token', token, { 
+            httpOnly: true, // Prevents JavaScript access (XSS protection)
+            secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+            sameSite: 'lax' // Protects against CSRF attacks
+        });
+
+        // Send response after setting the cookie
+        return res.status(200).json({
+            user: sanitizedUser, 
+            token,
+        });
+
     } catch (error) {
-        console.log(error)
+        console.error("Login Error:", error);
+        res.status(500).json({ error: "Internal server error." });
     }
-}
+};
 
-//profile
+
+//profile 
+// TO BE REMOVED IF NO USE : but probably ... in another universe we can still use it ;
 export const getProfile = (req, res) => {
 const {token} = req.cookies
 if(token) {

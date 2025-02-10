@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+/public/robots.txt
+/node_modules/.vite/deps/
+
 .env
 
 # Editor directories and files
